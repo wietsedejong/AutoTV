@@ -1,6 +1,6 @@
 # AutoTV
 
-Persoonlijke fork van [AABrowser](https://github.com/kododake/AABrowser) (GPL-3.0) voor YouTube, Netflix en andere videodiensten op het scherm van de auto via Android Auto. Alleen gebruiken als de auto stilstaat.
+Persoonlijke fork van [AABrowser](https://github.com/kododake/AABrowser) (GPL-3.0) voor YouTube, Netflix en andere videodiensten op het scherm van de auto via Android Auto.
 
 **Wijzigingen ten opzichte van AABrowser**
 - Eigen app-id (`nl.autotv.app`) en naam, zodat hij naast AABrowser kan staan
