@@ -1,3 +1,23 @@
+# AutoTV
+
+Persoonlijke fork van [AABrowser](https://github.com/kododake/AABrowser) (GPL-3.0) voor YouTube, Netflix en andere videodiensten op het scherm van de auto via Android Auto. Alleen gebruiken als de auto stilstaat.
+
+**Wijzigingen ten opzichte van AABrowser**
+- Eigen app-id (`nl.autotv.app`) en naam, zodat hij naast AABrowser kan staan
+- Startscherm-tegels: YouTube, Netflix, NPO Start, Videoland, Prime Video, Google
+- Per site automatisch de pc-identiteit (Netflix, Prime Video, Videoland, Disney+), zodat ze niet doorsturen naar de app
+- Eenvoudige adblocker plus het automatisch overslaan van YouTube-advertenties (`web/AutoTvTweaks.kt`)
+- Analytics (Umami) uitgeschakeld
+
+**Bouwen en installeren**
+```
+./gradlew assembleDebug
+adb install -r app/build/renamedApks/debug/AutoTV-3.3_debug.apk
+```
+Zet in Android Auto bij de ontwikkelaarsinstellingen "Onbekende bronnen" aan.
+
+---
+
 # <img src="https://github.com/user-attachments/assets/fa4252fa-b71e-4c87-9b93-d8ad832434cc" width="48" height="48" valign="bottom" /> AA Browser
 
 <a href="https://trendshift.io/repositories/45344" target="_blank"><img src="https://trendshift.io/api/badge/repositories/45344" alt="kododake%2FAABrowser | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>

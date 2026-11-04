@@ -60,6 +60,10 @@ fun configureWebView(
             setTag(R.id.webview_drm_l3_script_handler_tag, handler)
         }
 
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+            WebViewCompat.addDocumentStartJavaScript(this, AutoTvTweaks.YOUTUBE_AD_SKIP_JS, AutoTvTweaks.YOUTUBE_ORIGINS)
+        }
+
         isHorizontalScrollBarEnabled = false
         isVerticalScrollBarEnabled = true
 

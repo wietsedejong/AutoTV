@@ -55,9 +55,22 @@ class BrowserWebViewClient(
         return true
     }
 
+    override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+        if (!request.isForMainFrame && AutoTvTweaks.shouldBlock(request.url)) {
+            return AutoTvTweaks.emptyResponse()
+        }
+        return super.shouldInterceptRequest(view, request)
+    }
+
     override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
         val stringUrl = url ?: return
+        if (AutoTvTweaks.applyIdentityFor(view, stringUrl)) {
+            // Andere browser-identiteit nodig (bijv. Netflix): opnieuw laden met de nieuwe identiteit.
+            view.stopLoading()
+            view.post { view.loadUrl(stringUrl) }
+            return
+        }
         val uri = Uri.parse(stringUrl)
         val scheme = uri.scheme?.lowercase()
 

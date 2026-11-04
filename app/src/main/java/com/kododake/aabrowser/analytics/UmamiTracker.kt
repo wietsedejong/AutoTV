@@ -54,6 +54,7 @@ class UmamiTracker(context: Context) {
     }
 
     fun trackEvent(eventName: String, eventData: Map<String, String>? = null) {
+        if (true) return // AutoTV: analytics uitgeschakeld
         val payload = buildJsonObject {
             put("type", "event")
             put("payload", buildJsonObject {

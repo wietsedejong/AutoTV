@@ -33,11 +33,12 @@ object BookmarkPreferences {
     const val GAME_BOOKMARK_URL = "https://kododake.com/game/"
 
     val DEFAULT_BOOKMARK_ENTRIES = listOf(
-        BookmarkEntry("https://www.google.com", "Google"),
-        BookmarkEntry("https://youtube.com", "YouTube"),
-        BookmarkEntry("https://duckduckgo.com", "DuckDuckGo"),
-        BookmarkEntry("https://keepandroidopen.org", "Keep Android Open"),
-        BookmarkEntry(GAME_BOOKMARK_URL, "Kododake Games")
+        BookmarkEntry("https://m.youtube.com", "YouTube"),
+        BookmarkEntry("https://www.netflix.com/browse", "Netflix"),
+        BookmarkEntry("https://npo.nl/start", "NPO Start"),
+        BookmarkEntry("https://v2.videoland.com", "Videoland"),
+        BookmarkEntry("https://www.primevideo.com", "Prime Video"),
+        BookmarkEntry("https://www.google.com", "Google")
     )
 
     val DEFAULT_BOOKMARKS: List<String> = DEFAULT_BOOKMARK_ENTRIES.map { it.url }
@@ -78,6 +79,8 @@ object BookmarkPreferences {
     fun ensureGameBookmarkMigrated(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         if (prefs.getBoolean(KEY_GAME_BOOKMARK_MIGRATED, false)) return
+        // AutoTV: geen extra spelletjes-bladwijzer toevoegen
+        if (true) { prefs.edit().putBoolean(KEY_GAME_BOOKMARK_MIGRATED, true).apply(); return }
 
         val serializedBookmarks = prefs.getString(KEY_BOOKMARKS, null)
         if (serializedBookmarks.isNullOrBlank()) {
