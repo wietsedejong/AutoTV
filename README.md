@@ -2,9 +2,13 @@
 
 Persoonlijke fork van [AABrowser](https://github.com/kododake/AABrowser) (GPL-3.0) voor YouTube, Netflix en andere videodiensten op het scherm van de auto via Android Auto.
 
+<img src="docs/screenshots/autotv-home.png" alt="AutoTV tegeloverzicht" width="315">
+
 **Wijzigingen ten opzichte van AABrowser**
 - Eigen app-id (`nl.autotv.app`) en naam, zodat hij naast AABrowser kan staan
-- Startscherm-tegels: YouTube, Netflix, NPO Start, Videoland, Prime Video, Google
+- Tegeloverzicht bij het starten, met logo's: YouTube, Netflix, NPO Start, Videoland, Prime Video, Disney+
+- Zoektegel (Google) en plustegel om zelf diensten toe te voegen; lang drukken om een tegel te verwijderen
+- Kruis rechtsboven tijdens het kijken om terug te gaan naar de tegels
 - Per site automatisch de pc-identiteit (Netflix, Prime Video, Videoland, Disney+), zodat ze niet doorsturen naar de app
 - Eenvoudige adblocker plus het automatisch overslaan van YouTube-advertenties (`web/AutoTvTweaks.kt`)
 - Analytics (Umami) uitgeschakeld
