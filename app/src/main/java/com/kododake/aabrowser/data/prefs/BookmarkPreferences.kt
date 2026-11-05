@@ -36,7 +36,6 @@ object BookmarkPreferences {
         BookmarkEntry("https://m.youtube.com", "YouTube"),
         BookmarkEntry("https://www.netflix.com/browse", "Netflix"),
         BookmarkEntry("https://npo.nl/start", "NPO Start"),
-        BookmarkEntry("https://v2.videoland.com", "Videoland"),
         BookmarkEntry("https://www.primevideo.com", "Prime Video"),
         BookmarkEntry("https://www.google.com", "Google")
     )

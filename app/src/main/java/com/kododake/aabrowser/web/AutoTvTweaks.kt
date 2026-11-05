@@ -24,7 +24,6 @@ object AutoTvTweaks {
         "primevideo.com",
         "amazon.com",
         "amazon.nl",
-        "videoland.com",
         "disneyplus.com",
     )
 

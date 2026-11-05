@@ -81,7 +81,6 @@ object AutoTvTileStore {
         AutoTvTile("YouTube", "https://m.youtube.com"),
         AutoTvTile("Netflix", "https://www.netflix.com/browse"),
         AutoTvTile("NPO Start", "https://npo.nl/start"),
-        AutoTvTile("Videoland", "https://v2.videoland.com"),
         AutoTvTile("Prime Video", "https://www.primevideo.com"),
         AutoTvTile("Disney+", "https://www.disneyplus.com"),
     )

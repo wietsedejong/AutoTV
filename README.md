@@ -6,10 +6,10 @@ Persoonlijke fork van [AABrowser](https://github.com/kododake/AABrowser) (GPL-3.
 
 **Wijzigingen ten opzichte van AABrowser**
 - Eigen app-id (`nl.autotv.app`) en naam, zodat hij naast AABrowser kan staan
-- Tegeloverzicht bij het starten, met logo's: YouTube, Netflix, NPO Start, Videoland, Prime Video, Disney+
+- Tegeloverzicht bij het starten, met logo's: YouTube, Netflix, NPO Start, Prime Video, Disney+
 - Zoektegel (Google) en plustegel om zelf diensten toe te voegen; lang drukken om een tegel te verwijderen
 - Kruis rechtsboven tijdens het kijken om terug te gaan naar de tegels
-- Per site automatisch de pc-identiteit (Netflix, Prime Video, Videoland, Disney+), zodat ze niet doorsturen naar de app
+- Per dienst automatisch de pc-identiteit (Netflix, Prime Video, Disney+), zodat ze niet doorsturen naar de app; die blijft vast tijdens inloggen en bij terugkeren naar de app
 - Eenvoudige adblocker plus het automatisch overslaan van YouTube-advertenties (`web/AutoTvTweaks.kt`)
 - Analytics (Umami) uitgeschakeld
 
@@ -19,6 +19,20 @@ Persoonlijke fork van [AABrowser](https://github.com/kododake/AABrowser) (GPL-3.
 adb install -r app/build/renamedApks/debug/AutoTV-3.3_debug.apk
 ```
 Zet in Android Auto bij de ontwikkelaarsinstellingen "Onbekende bronnen" aan.
+
+**Voor Nederlandse gebruikers: wat werkt wel en niet**
+
+| Dienst | Werkt? | Opmerking |
+|---|---|---|
+| YouTube | Ja | Mobiele site, reclame wordt overgeslagen |
+| Netflix | Ja | Inloggen (ook met de 4-cijferige code) en profielen wisselen werken; beeld maximaal 720p |
+| NPO Start | Ja | |
+| Videoland | **Nee** | De inlogpagina gebruikt een Cloudflare-controle die de browser in AutoTV afkeurt ("ons systeem heeft iets geks opgemerkt… probeer een andere browser of zet je extensies uit"). AutoTV probeert die controle bewust niet te omzeilen, daarom zit Videoland er niet standaard in. |
+| Prime Video, Disney+ | Niet getest | |
+
+Tips:
+- Log één keer per dienst in, het makkelijkst op de telefoon zelf (of via [scrcpy](https://github.com/Genymobile/scrcpy) op je computer). Daarna blijf je ingelogd.
+- Gebruik **Instellingen → Sitegegevens wissen** in de app alleen als je echt overal wilt uitloggen.
 
 ---
 
