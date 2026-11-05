@@ -43,11 +43,6 @@ class BrowserWebViewClient(
         if (CleartextNavigationHandler.handleCleartextIfNeeded(view, uri, callbacks, onPageStart = false)) {
             return true
         }
-        if (request.isForMainFrame && AutoTvTweaks.switchForNavigation(view, uri?.toString())) {
-            // AutoTV: in- of uitstappen van een inlogpagina met browsercontrole; met de juiste identiteit opnieuw starten.
-            view.loadUrl(uri.toString())
-            return true
-        }
         return handleUri(uri)
     }
 
@@ -87,6 +82,8 @@ class BrowserWebViewClient(
     override fun onPageFinished(view: WebView, url: String?) {
         super.onPageFinished(view, url)
         AutoTvTweaks.clearRestarting(view)
+        // AutoTV: inlog-cookies direct wegschrijven, zodat een inlog niet verloren gaat als de app wordt afgesloten.
+        android.webkit.CookieManager.getInstance().flush()
         view.evaluateJavascript(SpeechRecognitionBridge.POLYFILL_JS, null)
         if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
             if (BrowserPreferences.isDrmL3EnforcerEnabled(view.context)) {
@@ -126,6 +123,9 @@ class BrowserWebViewClient(
                 return
             }
         }
+        // AutoTV: fouten van losse onderdelen van een pagina (bijv. een meldingenserver die niet bestaat)
+        // niet als foutmelding onderin tonen; de pagina zelf werkt gewoon.
+        if (!request.isForMainFrame) return
         callbacks.onError(error.errorCode, error.description?.toString())
     }
 
