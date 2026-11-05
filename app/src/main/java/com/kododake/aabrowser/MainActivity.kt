@@ -21,9 +21,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.webkit.CookieManager
 import android.webkit.WebView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.ComposeView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.kododake.aabrowser.autotv.AutoTvCloseButton
+import com.kododake.aabrowser.autotv.AutoTvHomeScreen
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.isVisible
@@ -118,6 +127,7 @@ class MainActivity : AppCompatActivity(), MainActivityCallbackFactory.CallbackHo
         managers.umamiTracker.trackEvent("app_open")
         setupUi()
         setupBackPressHandling()
+        setupAutoTvHome(startInBrowser = managers.navigationManager.extractBrowsableUrl(intent) != null)
 
         managers.permissionManager.ensureNotificationPermissionIfNeeded(REQUEST_CODE_POST_NOTIFICATIONS)
         FreeDroidWarnHelper.checkAndShow(this, managers.themeManager.resolveThemeColor(androidx.appcompat.R.attr.colorError)) { url ->
@@ -130,7 +140,77 @@ class MainActivity : AppCompatActivity(), MainActivityCallbackFactory.CallbackHo
         setIntent(intent)
         managers.navigationManager.extractBrowsableUrl(intent)?.let {
             managers.navigationManager.loadUrlFromIntent(it)
+            hideAutoTvHome()
         }
+    }
+
+    // ---- AutoTV: tegeloverzicht + kruis rechtsboven ----
+
+    private lateinit var autoTvHomeView: ComposeView
+    private lateinit var autoTvCloseView: ComposeView
+    private val autoTvBackCallback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            val wv = webView
+            if (binding.menuOverlay.isVisible || managers.uiManager.isInFullscreen()) {
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+                isEnabled = !isAutoTvHomeVisible()
+            } else if (wv != null && wv.canGoBack()) {
+                wv.goBack()
+            } else {
+                showAutoTvHome()
+            }
+        }
+    }
+
+    private fun isAutoTvHomeVisible() = ::autoTvHomeView.isInitialized && autoTvHomeView.isVisible
+
+    private fun setupAutoTvHome(startInBrowser: Boolean) {
+        val root = binding.root
+        autoTvHomeView = ComposeView(this).apply {
+            elevation = 50f
+            setContent { AutoTvHomeScreen(onOpen = ::openFromAutoTvHome) }
+        }
+        root.addView(autoTvHomeView, CoordinatorLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+
+        val margin = (16 * resources.displayMetrics.density).toInt()
+        autoTvCloseView = ComposeView(this).apply {
+            elevation = 60f
+            setContent { AutoTvCloseButton(onClose = ::showAutoTvHome) }
+        }
+        root.addView(autoTvCloseView, CoordinatorLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+            gravity = Gravity.TOP or Gravity.END
+            setMargins(margin, margin, margin, margin)
+        })
+
+        onBackPressedDispatcher.addCallback(this, autoTvBackCallback)
+        if (startInBrowser) hideAutoTvHome() else showAutoTvHome()
+    }
+
+    private fun openFromAutoTvHome(url: String) {
+        managers.navigationManager.navigateFromBookmark(url)
+        hideAutoTvHome()
+    }
+
+    private fun showAutoTvHome() {
+        // Video/geluid stoppen voordat we het overzicht tonen.
+        webView?.evaluateJavascript(
+            "document.querySelectorAll('video,audio').forEach(function(m){try{m.pause()}catch(e){}});",
+            null
+        )
+        managers.uiManager.exitFullscreen()
+        autoTvHomeView.visibility = View.VISIBLE
+        autoTvCloseView.visibility = View.GONE
+        binding.fabComposeView.visibility = View.GONE
+        autoTvBackCallback.isEnabled = false
+    }
+
+    private fun hideAutoTvHome() {
+        if (!::autoTvHomeView.isInitialized) return
+        autoTvHomeView.visibility = View.GONE
+        autoTvCloseView.visibility = View.VISIBLE
+        binding.fabComposeView.visibility = View.VISIBLE
+        autoTvBackCallback.isEnabled = true
     }
 
     override fun onResume() {
@@ -148,6 +228,7 @@ class MainActivity : AppCompatActivity(), MainActivityCallbackFactory.CallbackHo
         managers.uiManager.exitFullscreen()
         webView?.onPause()
         managers.tabManager.persistTabSession()
+        CookieManager.getInstance().flush() // AutoTV: inlogsessies direct bewaren
         super.onPause()
     }
 
