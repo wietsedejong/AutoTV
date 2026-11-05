@@ -67,7 +67,7 @@ fun configureWebView(
         isHorizontalScrollBarEnabled = false
         isVerticalScrollBarEnabled = true
 
-        WebView.setWebContentsDebuggingEnabled(false)
+        WebView.setWebContentsDebuggingEnabled(com.kododake.aabrowser.BuildConfig.DEBUG) // AutoTV: inspecteerbaar in debug-builds
 
         val originalUserAgent = settings.userAgentString
         setTag(R.id.webview_original_user_agent_tag, originalUserAgent)

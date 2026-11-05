@@ -88,13 +88,39 @@ object AutoTvTweaks {
         val scheme = url?.let { Uri.parse(it).scheme?.lowercase() }
         if (scheme != "http" && scheme != "https") return false
         stickyDesktop[view] = wantsDesktop(url) == true
-        return reapplyStickyIdentity(view)
+        return applyFor(view, url)
+    }
+
+    /**
+     * Inlogpagina's met een "echte browser"-controle (Cloudflare). Daar gebruiken we de echte,
+     * kloppende identiteit van de app in plaats van de pc-identiteit, anders keurt de controle
+     * de browser af ("ons systeem heeft iets geks opgemerkt").
+     */
+    private val GENUINE_IDENTITY_HOSTS = listOf(
+        "account.videoland.com",
+    )
+
+    private fun isGenuineHost(url: String?): Boolean {
+        val host = url?.let { Uri.parse(it).host?.lowercase() } ?: return false
+        return hostMatches(host, GENUINE_IDENTITY_HOSTS)
     }
 
     /** Herstelt de vastgezette identiteit (bijv. na terugkeren naar de app). @return true als gewijzigd. */
-    fun reapplyStickyIdentity(view: WebView): Boolean {
+    fun reapplyStickyIdentity(view: WebView): Boolean = applyFor(view, view.url)
+
+    /**
+     * Voor een navigatie binnen een dienst met pc-identiteit: wissel alleen tussen pc en echte identiteit
+     * bij het betreden/verlaten van een inlogpagina uit [GENUINE_IDENTITY_HOSTS].
+     * @return true als de identiteit gewijzigd is (de navigatie moet dan opnieuw gestart worden).
+     */
+    fun switchForNavigation(view: WebView, url: String?): Boolean {
+        if (stickyDesktop[view] != true) return false
+        return applyFor(view, url)
+    }
+
+    private fun applyFor(view: WebView, url: String?): Boolean {
         val context = view.context
-        val forcedDesktop = stickyDesktop[view] == true
+        val forcedDesktop = stickyDesktop[view] == true && !isGenuineHost(url)
         val profile = if (forcedDesktop) UserAgentProfile.ANDROID_CHROME else BrowserPreferences.getUserAgentProfile(context)
         val desktop = forcedDesktop || BrowserPreferences.shouldUseDesktopMode(context)
         if (UserAgentManager.isBrowserIdentityApplied(view, profile, desktop)) return false

@@ -43,6 +43,11 @@ class BrowserWebViewClient(
         if (CleartextNavigationHandler.handleCleartextIfNeeded(view, uri, callbacks, onPageStart = false)) {
             return true
         }
+        if (request.isForMainFrame && AutoTvTweaks.switchForNavigation(view, uri?.toString())) {
+            // AutoTV: in- of uitstappen van een inlogpagina met browsercontrole; met de juiste identiteit opnieuw starten.
+            view.loadUrl(uri.toString())
+            return true
+        }
         return handleUri(uri)
     }
 
