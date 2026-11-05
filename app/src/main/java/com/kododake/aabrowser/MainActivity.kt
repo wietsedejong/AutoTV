@@ -180,7 +180,8 @@ class MainActivity : AppCompatActivity(), MainActivityCallbackFactory.CallbackHo
         }
         root.addView(autoTvCloseView, CoordinatorLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
             gravity = Gravity.TOP or Gravity.END
-            setMargins(margin, margin, margin, margin)
+            // Iets onder de kopbalk van sites, zodat het kruis hun knoppen (zoeken, account) niet bedekt.
+            setMargins(margin, margin * 5, margin, margin)
         })
 
         onBackPressedDispatcher.addCallback(this, autoTvBackCallback)
