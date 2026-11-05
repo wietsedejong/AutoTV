@@ -43,6 +43,11 @@ class BrowserWebViewClient(
         if (CleartextNavigationHandler.handleCleartextIfNeeded(view, uri, callbacks, onPageStart = false)) {
             return true
         }
+        if (request.isForMainFrame && AutoTvTweaks.applyIdentityFor(view, uri?.toString())) {
+            // AutoTV: andere browser-identiteit nodig; deze navigatie netjes vervangen (geen foutpagina).
+            view.loadUrl(uri.toString())
+            return true
+        }
         return handleUri(uri)
     }
 
@@ -66,7 +71,8 @@ class BrowserWebViewClient(
         super.onPageStarted(view, url, favicon)
         val stringUrl = url ?: return
         if (AutoTvTweaks.applyIdentityFor(view, stringUrl)) {
-            // Andere browser-identiteit nodig (bijv. Netflix): opnieuw laden met de nieuwe identiteit.
+            // Vangnet: andere browser-identiteit nodig (bijv. Netflix): opnieuw laden met de nieuwe identiteit.
+            AutoTvTweaks.markRestarting(view)
             view.stopLoading()
             view.post { view.loadUrl(stringUrl) }
             return
@@ -86,6 +92,7 @@ class BrowserWebViewClient(
 
     override fun onPageFinished(view: WebView, url: String?) {
         super.onPageFinished(view, url)
+        AutoTvTweaks.clearRestarting(view)
         view.evaluateJavascript(SpeechRecognitionBridge.POLYFILL_JS, null)
         if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
             if (BrowserPreferences.isDrmL3EnforcerEnabled(view.context)) {
@@ -98,6 +105,10 @@ class BrowserWebViewClient(
     }
 
     override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+        if (request.isForMainFrame && AutoTvTweaks.isTransientMainFrameError(view, error.errorCode, error.description?.toString())) {
+            // AutoTV: afgebroken/vervangen navigatie (net::ERR_FAILED / ERR_ABORTED) – geen foutpagina tonen.
+            return
+        }
         if (request.isForMainFrame) {
             val code = error.errorCode
             val shouldShowErrorPage = when (code) {

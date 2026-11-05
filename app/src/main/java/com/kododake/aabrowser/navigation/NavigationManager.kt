@@ -166,6 +166,8 @@ class NavigationManager(
         }
 
         finishNavigation { 
+            // AutoTV: juiste browser-identiteit vóór het laden, zodat er niet herladen hoeft te worden.
+            com.kododake.aabrowser.web.AutoTvTweaks.applyIdentityFor(targetWebView, navigable)
             targetWebView.loadUrl(navigable) 
         }
     }

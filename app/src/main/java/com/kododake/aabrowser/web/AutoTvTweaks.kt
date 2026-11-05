@@ -91,6 +91,23 @@ object AutoTvTweaks {
         return true
     }
 
+    private val restartingViews: MutableSet<WebView> =
+        java.util.Collections.newSetFromMap(java.util.WeakHashMap())
+
+    fun markRestarting(view: WebView) { restartingViews.add(view) }
+    fun clearRestarting(view: WebView) { restartingViews.remove(view) }
+
+    /**
+     * Fouten die alleen ontstaan doordat een navigatie werd afgebroken of vervangen
+     * (bijv. door een identiteitswissel of een snelle JS-doorverwijzing). Die tonen we niet.
+     */
+    fun isTransientMainFrameError(view: WebView, code: Int, description: String?): Boolean {
+        if (view in restartingViews) return true
+        if (code != android.webkit.WebViewClient.ERROR_UNKNOWN) return false
+        val d = description.orEmpty()
+        return d.contains("ERR_FAILED") || d.contains("ERR_ABORTED")
+    }
+
     fun shouldBlock(uri: Uri?): Boolean {
         val host = uri?.host?.lowercase() ?: return false
         if (hostMatches(host, AD_HOSTS)) return true
