@@ -75,15 +75,26 @@ object AutoTvTweaks {
         return if (hostMatches(host, DESKTOP_HOSTS)) true else null
     }
 
+    /** Per WebView vastgezette keuze: true = pc-identiteit, false = de identiteit uit de instellingen. */
+    private val stickyDesktop: MutableMap<WebView, Boolean> = java.util.WeakHashMap()
+
     /**
-     * Zorgt dat de WebView de juiste identiteit heeft voor [url].
-     * @return true als de identiteit gewijzigd is (de pagina moet dan opnieuw geladen worden).
+     * Kiest de identiteit voor een dienst die de gebruiker opent (tegel, adresbalk) en zet die vast
+     * voor deze sessie. Navigaties binnen de dienst (inloggen, doorverwijzingen) en terugkeren naar
+     * de app veranderen hem niet meer, zodat de site steeds hetzelfde "apparaat" ziet.
+     * @return true als de identiteit gewijzigd is.
      */
     fun applyIdentityFor(view: WebView, url: String?): Boolean {
         val scheme = url?.let { Uri.parse(it).scheme?.lowercase() }
         if (scheme != "http" && scheme != "https") return false
+        stickyDesktop[view] = wantsDesktop(url) == true
+        return reapplyStickyIdentity(view)
+    }
+
+    /** Herstelt de vastgezette identiteit (bijv. na terugkeren naar de app). @return true als gewijzigd. */
+    fun reapplyStickyIdentity(view: WebView): Boolean {
         val context = view.context
-        val forcedDesktop = wantsDesktop(url) == true
+        val forcedDesktop = stickyDesktop[view] == true
         val profile = if (forcedDesktop) UserAgentProfile.ANDROID_CHROME else BrowserPreferences.getUserAgentProfile(context)
         val desktop = forcedDesktop || BrowserPreferences.shouldUseDesktopMode(context)
         if (UserAgentManager.isBrowserIdentityApplied(view, profile, desktop)) return false
@@ -106,6 +117,23 @@ object AutoTvTweaks {
         if (code != android.webkit.WebViewClient.ERROR_UNKNOWN) return false
         val d = description.orEmpty()
         return d.contains("ERR_FAILED") || d.contains("ERR_ABORTED")
+    }
+
+    /** Betaalde streamingdiensten: hier niets blokkeren, hun spelers kunnen daar op stuk gaan. */
+    private val NO_BLOCK_PAGE_HOSTS = DESKTOP_HOSTS + listOf("npo.nl", "npostart.nl", "rtl.nl", "kijk.nl")
+
+    private val pageHosts: MutableMap<WebView, String> =
+        java.util.Collections.synchronizedMap(java.util.WeakHashMap())
+
+    fun onPageStarted(view: WebView, url: String?) {
+        val host = url?.let { Uri.parse(it).host?.lowercase() } ?: return
+        pageHosts[view] = host
+    }
+
+    fun shouldBlock(view: WebView, uri: Uri?): Boolean {
+        val pageHost = pageHosts[view]
+        if (pageHost != null && hostMatches(pageHost, NO_BLOCK_PAGE_HOSTS)) return false
+        return shouldBlock(uri)
     }
 
     fun shouldBlock(uri: Uri?): Boolean {

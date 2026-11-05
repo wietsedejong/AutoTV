@@ -288,8 +288,12 @@ class TabManager(
     }
 
     fun updateUserAgentProfile(profile: UserAgentProfile, desktop: Boolean) {
-        browserTabs
-            .filterNot { tab -> UserAgentManager.isBrowserIdentityApplied(tab.webView, profile, desktop) }
-            .forEach { tab -> tab.webView.updateUserAgentProfile(profile, desktop) }
+        // AutoTV: per tab de vastgezette identiteit respecteren (Netflix e.d. blijven pc),
+        // en alleen herladen als er echt iets verandert.
+        browserTabs.forEach { tab ->
+            if (com.kododake.aabrowser.web.AutoTvTweaks.reapplyStickyIdentity(tab.webView)) {
+                tab.webView.reload()
+            }
+        }
     }
 }

@@ -43,11 +43,6 @@ class BrowserWebViewClient(
         if (CleartextNavigationHandler.handleCleartextIfNeeded(view, uri, callbacks, onPageStart = false)) {
             return true
         }
-        if (request.isForMainFrame && AutoTvTweaks.applyIdentityFor(view, uri?.toString())) {
-            // AutoTV: andere browser-identiteit nodig; deze navigatie netjes vervangen (geen foutpagina).
-            view.loadUrl(uri.toString())
-            return true
-        }
         return handleUri(uri)
     }
 
@@ -61,7 +56,7 @@ class BrowserWebViewClient(
     }
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
-        if (!request.isForMainFrame && AutoTvTweaks.shouldBlock(request.url)) {
+        if (!request.isForMainFrame && AutoTvTweaks.shouldBlock(view, request.url)) {
             return AutoTvTweaks.emptyResponse()
         }
         return super.shouldInterceptRequest(view, request)
@@ -70,13 +65,7 @@ class BrowserWebViewClient(
     override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
         val stringUrl = url ?: return
-        if (AutoTvTweaks.applyIdentityFor(view, stringUrl)) {
-            // Vangnet: andere browser-identiteit nodig (bijv. Netflix): opnieuw laden met de nieuwe identiteit.
-            AutoTvTweaks.markRestarting(view)
-            view.stopLoading()
-            view.post { view.loadUrl(stringUrl) }
-            return
-        }
+        AutoTvTweaks.onPageStarted(view, stringUrl)
         val uri = Uri.parse(stringUrl)
         val scheme = uri.scheme?.lowercase()
 
